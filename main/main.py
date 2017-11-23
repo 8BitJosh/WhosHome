@@ -3,7 +3,7 @@ import socketio
 import asyncio
 import subprocess
 import json
-import time
+from datetime import datetime
 import os
 
 socketio = socketio.AsyncServer()
@@ -16,11 +16,13 @@ ipRange = '192.168.0.*'
 #ipRange = '10.9.159.*'
 
 Users = {}
-
 if not os.path.isfile('Users.json'):
     with open('Users.json', 'w') as file:
         json.dump({}, file)
-        Users = json.load(file)
+    
+with open('Users.json', 'r') as file:
+    Users = json.load(file)
+
 
 async def index(request):
     return web.FileResponse('./main/templates/index.html')
@@ -34,33 +36,34 @@ async def whoshome(sid):
 
 @socketio.on('addUser', namespace='/main')
 async def addUser(sid, data):
+    global Users
     if data['mac'] not in Users:
         return 0
-    
+
     Users[data['mac']]['name'] = data['name']
     print(data)
 
-    with open('Users.json', 'w') as file:
-        json.dump(Users, file)
-
+    saveFile()
     await socketio.emit('table', Users, namespace='/main')
 
 
 def saveFile():
+    global Users
     with open('Users.json', 'w') as file:
+        print('Saving file - ' + datetime.now().strftime("[%d/%m/%y %H:%M:%S]"))
         json.dump(Users, file)
 
 
-async def updateNmap():
+async def updateNmap(): 
     global Users
-
-    while True: 
+    await asyncio.sleep(20)
+    
+    while True:
         tempUsers = Users
         # get nmap data
-        cmd = 'sudo nmap -sn ' + ipRange
         y = subprocess.run(['sudo', 'nmap', '-sn', ipRange], stdout=subprocess.PIPE)
         output = str(y.stdout)
-        timeNow = time.ctime().format()
+        timeNow = datetime.now().strftime("[%d/%m/%y %H:%M:%S]")
         print('Scan Run at ' + timeNow)
         # process nmap data
         vals = output.split('\\n')
@@ -80,6 +83,9 @@ async def updateNmap():
 
             if mac not in tempUsers:
                 tempUsers[mac] = {}
+
+            if 'name' not in tempUsers[mac]:
+                tempUsers[mac]['name'] = 'undefined'
 
             tempUsers[mac]['ip'] = ip
             tempUsers[mac]['last'] = timeNow
