@@ -12,8 +12,8 @@ socketio.attach(app)
 
 loop = asyncio.get_event_loop()
 
-#ipRange = '192.168.0.*'
-ipRange = '10.9.162.*'
+ipRange = '192.168.0.*'
+#ipRange = '10.9.159.*'
 
 Users = {}
 
@@ -65,8 +65,8 @@ async def updateNmap():
         # process nmap data
         vals = output.split('\\n')
 
-        for user in tempUsers:
-            user['Online'] = 0
+        for key in tempUsers:
+            tempUsers[key]['online'] = 0
 
         i = 0
         while 'Starting' not in vals[i]:
