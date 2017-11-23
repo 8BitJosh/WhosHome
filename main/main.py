@@ -14,8 +14,7 @@ socketio.attach(app)
 
 loop = asyncio.get_event_loop()
 
-ipRange = '192.168.0.*'
-#ipRange = '10.9.159.*'
+ipRange = '192.168.0.0/24'
 
 Users = {}
 if not os.path.isfile('Users.json'):
@@ -61,7 +60,7 @@ async def updateNmap():
     await asyncio.sleep(20)
 
     while True:
-        p = subprocess.Popen(['sudo','nmap','-oX','-','-sn','192.168.0.0/24'],
+        p = subprocess.Popen(['sudo','nmap','-oX','-','-sn',ipRange],
                             bufsize=10000,stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (temp_xml,temp_err) = p.communicate()
