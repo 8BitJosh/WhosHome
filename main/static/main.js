@@ -17,12 +17,12 @@ socket.on('table', function(msg) {
 
     $.each(msg, function(index, item) {
         if(item.online == 1){
-            $('<tr>').html("<td>" + item.name + "</td><td>" + item.ip + "</td><td>" + item.mac + "</td><td>" + item.last + "</td><td>" +
+            $('<tr>').html("<td>" + item.name + "</td><td>" + item.ip + "</td><td>" + index + "</td><td>" + item.last + "</td><td>" +
                 "<button id='setName1' class='btn btn-sm btn-success'><span class='glyphicon glyphicon-option-horizontal'></span></button>" +
                 "</td>").appendTo('#online_table');
         }
         else{
-            $('<tr>').html("<td>" + item.name + "</td><td>" + item.ip + "</td><td>" + item.mac + "</td><td>" + item.last + "</td><td>" +
+            $('<tr>').html("<td>" + item.name + "</td><td>" + item.ip + "</td><td>" + index + "</td><td>" + item.last + "</td><td>" +
                 "<button id='setName2' class='btn btn-sm btn-success'><span class='glyphicon glyphicon-option-horizontal'></span></button>" +
                 "</td>").appendTo('#offline_table');
         }
@@ -30,9 +30,9 @@ socket.on('table', function(msg) {
 });
 
 
-$('#Online_Table').on('click', '#setName1', function() {
+$('#online_table').on('click', '#setName1', function() {
     var index = $(this).closest('tr').index();
-    var val = $('table#Online_Table tr:eq(' + index + ') td:eq(' + 2 + ')').text();
+    var val = $('table#online_table tr:eq(' + index + ') td:eq(' + 2 + ')').text();
 
     var userinput = window.prompt("Enter New Name For the device", "");
 
@@ -45,9 +45,9 @@ $('#Online_Table').on('click', '#setName1', function() {
     }
 });
 
-$('#Offline_Table').on('click', '#setName2', function() {
+$('#offline_table').on('click', '#setName2', function() {
     var index = $(this).closest('tr').index();
-    var val = $('table#Offline_Table tr:eq(' + index + ') td:eq(' + 2 + ')').text();
+    var val = $('table#offline_table tr:eq(' + index + ') td:eq(' + 2 + ')').text();
 
     var userinput = window.prompt("Enter New Name For the device", "");
 

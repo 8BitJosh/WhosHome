@@ -3,6 +3,8 @@ import socketio
 import asyncio
 import subprocess
 import json
+import time
+import os
 
 socketio = socketio.AsyncServer()
 app = web.Application()
@@ -10,13 +12,15 @@ socketio.attach(app)
 
 loop = asyncio.get_event_loop()
 
-ipRange = '192.168.0.*'
-ipStart = '192'
+#ipRange = '192.168.0.*'
+ipRange = '10.9.162.*'
 
 Users = {}
-with open('Users.json') as file:
-    Users = json.load(file)
 
+if not os.path.isfile('Users.json'):
+    with open('Users.json', 'w') as file:
+        json.dump({}, file)
+        Users = json.load(file)
 
 async def index(request):
     return web.FileResponse('./main/templates/index.html')
@@ -24,26 +28,45 @@ async def index(request):
 
 @socketio.on('getTable', namespace='/main')
 async def whoshome(sid):
+    global Users
     await socketio.emit('table', Users, namespace='/main', room=sid)
 
 
 @socketio.on('addUser', namespace='/main')
 async def addUser(sid, data):
-    ##Error checking of the user web inputs
-    ##update users list 
+    if data['mac'] not in Users:
+        return 0
+    
+    Users[data['mac']]['name'] = data['name']
+    print(data)
+
     with open('Users.json', 'w') as file:
         json.dump(Users, file)
-    return 0
+
+    await socketio.emit('table', Users, namespace='/main')
+
+
+def saveFile():
+    with open('Users.json', 'w') as file:
+        json.dump(Users, file)
 
 
 async def updateNmap():
+    global Users
+
     while True: 
-        ##get nmap data
+        tempUsers = Users
+        # get nmap data
         cmd = 'sudo nmap -sn ' + ipRange
         y = subprocess.run(['sudo', 'nmap', '-sn', ipRange], stdout=subprocess.PIPE)
         output = str(y.stdout)
-        ##process nmap data
+        timeNow = time.ctime().format()
+        print('Scan Run at ' + timeNow)
+        # process nmap data
         vals = output.split('\\n')
+
+        for user in tempUsers:
+            user['Online'] = 0
 
         i = 0
         while 'Starting' not in vals[i]:
@@ -55,13 +78,20 @@ async def updateNmap():
             i = i+2
             mac = vals[i][13:30]
 
+            if mac not in tempUsers:
+                tempUsers[mac] = {}
 
-        ##put data into Online dict
-        ##put last seen data in the users file
+            tempUsers[mac]['ip'] = ip
+            tempUsers[mac]['last'] = timeNow
+            tempUsers[mac]['online'] = 1
+
+        Users = tempUsers
+        await socketio.emit('table', Users, namespace='/main')
+        saveFile()
         await asyncio.sleep(300)
 
 
-#loop.create_task(updateNmap())
+loop.create_task(updateNmap())
 
 app.router.add_get('/', index)
 app.router.add_static('/static/', path=str('./main/static'), name='static')
