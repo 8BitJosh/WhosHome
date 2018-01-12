@@ -17,12 +17,12 @@ socket.on('table', function(msg) {
 
     $.each(msg, function(index, item) {
         if(item.online == 1){
-            $('<tr>').html("<td>" + item.name + "</td><td>" + item.ip + "</td><td>" + index + "</td><td>" + item.last + "</td><td>" +
+            $('<tr>').html("<td>" + item.name + "</td><td>" + item.ip + "</td><td>" + index + "</td><td>" + item.last + "</td><td>" + genTime(item.upTime) + "</td><td>" + 
                 "<button id='setName1' class='btn btn-sm btn-success'><span class='glyphicon glyphicon-option-horizontal'></span></button>" +
                 "</td>").appendTo('#online_table');
         }
         else{
-            $('<tr>').html("<td>" + item.name + "</td><td>" + item.ip + "</td><td>" + index + "</td><td>" + item.last + "</td><td>" +
+            $('<tr>').html("<td>" + item.name + "</td><td>" + item.ip + "</td><td>" + index + "</td><td>" + item.last + "</td><td>" + genTime(item.upTime) + "</td><td>" +
                 "<button id='setName2' class='btn btn-sm btn-success'><span class='glyphicon glyphicon-option-horizontal'></span></button>" +
                 "</td>").appendTo('#offline_table');
         }
@@ -62,3 +62,12 @@ $('#offline_table').on('click', '#setName2', function() {
 
 });
 
+
+function genTime(time){
+    var h = Math.floor(time / 3600);
+    var m = Math.floor(time % 3600 / 60);
+
+    var hours = String(h) + ':';
+    var minutes = m > 9 ? String(m) : "0" + String(m);
+    return (hours + minutes) ;
+}

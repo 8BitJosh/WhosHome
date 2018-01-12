@@ -15,6 +15,7 @@ socketio.attach(app)
 loop = asyncio.get_event_loop()
 
 ipRange = '192.168.0.0/24'
+scaninterval = 300
 
 Users = {}
 if not os.path.isfile('Users.json'):
@@ -57,6 +58,7 @@ def saveFile():
 
 async def updateNmap():
     global Users
+    global scaninterval
     await asyncio.sleep(20)
 
     while True:
@@ -70,7 +72,7 @@ async def updateNmap():
         timeNow = datetime.now().strftime("[%d/%m/%y %H:%M:%S]")
         print('Scan run at {} in {} seconds, hosts up: {}'.format(timeNow,
                             temp_json['nmaprun']['runstats']['finished']['@elapsed'],
-                            temp_json['nmaprun']['runstats']['hosts']['@up']))
+                            temp_json['nmaprun']['runstats']['hosts']['@up']), flush=True)
         for key in tempUsers:
             tempUsers[key]['online'] = 0
 
@@ -101,15 +103,17 @@ async def updateNmap():
 
             if 'name' not in tempUsers[mac]:
                 tempUsers[mac]['name'] = 'undefined'
+                tempUsers[mac]['upTime'] = 0
 
             tempUsers[mac]['ip'] = ip
             tempUsers[mac]['last'] = timeNow
             tempUsers[mac]['online'] = 1
+            tempUsers[mac]['upTime'] += scaninterval            
 
         Users = tempUsers
         await socketio.emit('table', Users, namespace='/main')
         saveFile()
-        await asyncio.sleep(300)
+        await asyncio.sleep(scaninterval)
 
 
 loop.create_task(updateNmap())
