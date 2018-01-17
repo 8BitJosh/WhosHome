@@ -64,10 +64,12 @@ $('#offline_table').on('click', '#setName2', function() {
 
 
 function genTime(time){
-    var h = Math.floor(time / 3600);
+    var h = Math.floor((time / 3600) % 24);
+    var d = Math.floor(time / 3600) - h;
     var m = Math.floor(time % 3600 / 60);
 
-    var hours = String(h) + ':';
+    var days = String(d) + ':';
+    var hours = h > 9 ? String(h) + ':' :  '0' + String(h) + ':';
     var minutes = m > 9 ? String(m) : "0" + String(m);
-    return (hours + minutes) ;
+    return (days + hours + minutes) ;
 }
