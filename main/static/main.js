@@ -65,7 +65,7 @@ $('#offline_table').on('click', '#setName2', function() {
 
 function genTime(time){
     var h = Math.floor((time / 3600) % 24);
-    var d = Math.floor(time / 3600) - h*24;
+    var d = Math.floor(time / (3600*24));
     var m = Math.floor(time % 3600 / 60);
 
     var days = String(d) + ':';
